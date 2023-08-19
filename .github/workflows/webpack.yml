@@ -12,7 +12,11 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [18.x]
+
+    concurrency:
+      group: "pages"
+      cancel-in-progress: true
 
     steps:
     - uses: actions/checkout@v3
@@ -26,3 +30,13 @@ jobs:
       run: |
         npm install
         npm run build
+
+    - name: Upload GitHub Pages artifact
+      uses: actions/upload-pages-artifact@v2.0.0
+      with:
+        # Artifact name
+        path: ./
+        # Duration after which artifact will expire in days.
+        
+    - name: Deploy GitHub Pages site
+      uses: actions/deploy-pages@v1.2.9
