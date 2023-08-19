@@ -10,6 +10,7 @@ const height = window.innerHeight;
 
 let camera, scene, renderer;
 let group, box;
+let isTakingPinchAction = false;
 const handModelFactory = new XRHandModelFactory();
 const handList = [];
 const intersected = [];
@@ -85,8 +86,22 @@ function addHandController(index) {
   hand.userData.indexSphere = indexSphere;
   scene.add(hand.userData.indexSphere);
 
+  hand.addEventListener("pinchstart", onPinchStart);
+  hand.addEventListener("pinchend", onPinchEnd);
+
   scene.add(hand);
   return hand;
+}
+
+function onPinchStart() {
+  console.log("pinch start");
+  box.material.emissive.b = 1;
+  isTakingPinchAction = true;
+}
+function onPinchEnd() {
+  console.log("pinch end");
+  box.material.emissive.b = 0;
+  isTakingPinchAction = false;
 }
 
 function cleanIntersected() {
@@ -147,26 +162,27 @@ function onDrawAnimation(time, xrFrame) {
       // 判定可視化の座標更新
       updateIndexSphere(hand);
 
-      // 接触判定としてオブジェクトの色を赤くする
-      //const intersected_objects = hand.intersectBoxObject(object); //用意されている関数。true,falseで返すのでイマイチ
-      const intersectedObjects = getIntersectedObjects(group.children, hand);
-      if (intersectedObjects.length > 0) {
-        console.log("intersected");
-        console.log(intersectedObjects);
-        intersectedObjects.forEach((object) => {
-          object.material.emissive.r = 1;
-          intersected.push(object);
-          console.log("hand");
-          console.log(hand);
-          hand.userData.indexSphere.attach(object);
-          hand.userData.selected = object;
-        });
+      if (isTakingPinchAction) {
+        cleanIntersected();
+      } else {
+        // 接触判定としてオブジェクトの色を赤くする
+        //const intersected_objects = hand.intersectBoxObject(object); //用意されている関数。true,falseで返すのでイマイチ
+        const intersectedObjects = getIntersectedObjects(group.children, hand);
+        if (intersectedObjects.length > 0) {
+          console.log("intersected");
+          console.log(intersectedObjects);
+          intersectedObjects.forEach((object) => {
+            object.material.emissive.r = 1;
+            intersected.push(object);
+            console.log("hand");
+            console.log(hand);
+            hand.userData.indexSphere.attach(object);
+            hand.userData.selected = object;
+          });
+        }
       }
     }
   });
-
-  //接触判定の初期化
-  //if (touchCount == 1) cleanIntersected();
 
   renderer.render(scene, camera);
 }
