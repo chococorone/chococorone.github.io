@@ -11,6 +11,8 @@ const height = window.innerHeight;
 let camera, scene, renderer;
 let group, box;
 let isTakingPinchAction = false;
+let firstDistance = 0.0;
+
 const handModelFactory = new XRHandModelFactory();
 const handList = [];
 const intersected = [];
@@ -171,7 +173,12 @@ function onDrawAnimation(time, xrFrame) {
         if (intersectedObjects.length > 0) {
           console.log("intersected");
           console.log(intersectedObjects);
+
           intersectedObjects.forEach((object) => {
+            firstDistance = object.position.distanceTo(
+              hand.userData.indexSphere.position
+            );
+            console.log(firstDistance);
             object.material.emissive.r = 1;
             intersected.push(object);
             console.log("hand");
